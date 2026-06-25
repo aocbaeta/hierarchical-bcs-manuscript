@@ -7,7 +7,7 @@ import json
 
 import numpy as np
 
-from bcs_core import bcs_gap_iteration, default_model, exact_ground_state, hierarchy_residual
+from bcs_core import bcs_gap_iteration, default_model, exact_ground_state, hierarchy_residual, source_response
 from pauli_mapper import bcs_pauli_terms, pauli_matrix_sum
 
 
@@ -27,12 +27,14 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--levels", type=int, default=4)
     parser.add_argument("--g", type=float, default=0.7)
+    parser.add_argument("--eta", type=float, default=0.0)
     args = parser.parse_args()
 
-    model = default_model(n_levels=args.levels, g=args.g)
+    model = default_model(n_levels=args.levels, g=args.g, eta=args.eta)
     exact = exact_ground_state(model)
-    closure = bcs_gap_iteration(model)
+    closure = bcs_gap_iteration(default_model(n_levels=args.levels, g=args.g, eta=0.0))
     residual = hierarchy_residual(model, exact["state"])
+    source = source_response(model, exact["state"])
 
     terms = bcs_pauli_terms(model)
     mapped_h = pauli_matrix_sum(terms)
@@ -44,12 +46,15 @@ def main() -> None:
             "n_qubits": model.n_modes,
             "xi": model.xi.tolist(),
             "g": model.g,
+            "eta": model.eta,
         },
         "exact_ground_energy": exact["energy"],
         "bcs_mean_field_energy": closure["energy_mean_field"],
         "bcs_gap_delta": closure["delta"],
         "leading_pair_density_eigenvalue": residual["leading_pair_density_eigenvalue"],
         "relative_pair_density_residual": residual["relative_pair_density_residual"],
+        "source_pair_norm": source["source_pair_norm"],
+        "relative_source_profile_error": source["relative_source_profile_error"],
         "pauli_terms": len(terms),
         "jw_mapping_matrix_error": mapping_error,
     }

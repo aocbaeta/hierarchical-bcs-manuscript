@@ -6,7 +6,8 @@ Mode convention for level j:
 
 The model is
     H = sum_j xi_j (n_{j up} + n_{j down})
-        - g sum_{j,l} c^dag_{j up} c^dag_{j down} c_{l down} c_{l up}.
+        - g sum_{j,l} c^dag_{j up} c^dag_{j down} c_{l down} c_{l up}
+        - eta sum_j (P_j^dag + P_j).
 
 This file intentionally uses only numpy/scipy so the benchmark layer can run
 even when Qiskit, Cirq, and PennyLane are not installed.
@@ -32,6 +33,7 @@ N = CDAG @ C
 class BCSModel:
     xi: np.ndarray
     g: float
+    eta: float = 0.0
 
     @property
     def n_levels(self) -> int:
@@ -88,6 +90,10 @@ def hamiltonian_matrix(model: BCSModel) -> np.ndarray:
         pj_dag = pair_creation(j, model.n_modes)
         for l in range(model.n_levels):
             h += -model.g * pj_dag @ pair_annihilation(l, model.n_modes)
+    if model.eta:
+        for j in range(model.n_levels):
+            p = pair_annihilation(j, model.n_modes)
+            h += -model.eta * (p.conj().T + p)
     return 0.5 * (h + h.conj().T)
 
 
@@ -189,6 +195,26 @@ def hierarchy_residual(model: BCSModel, state: np.ndarray) -> dict:
     }
 
 
-def default_model(n_levels: int = 4, g: float = 0.7) -> BCSModel:
+def source_response(model: BCSModel, state: np.ndarray) -> dict:
+    """Number-symmetry-breaking response induced by the external pair source."""
+    phi = pair_correlators(model, state)
+    closure = bcs_gap_iteration(BCSModel(xi=model.xi, g=model.g, eta=0.0))
+    projected_phi = np.asarray(closure["anomalous"], dtype=complex)
+    denom = max(np.linalg.norm(projected_phi), 1e-14)
+    phase_aligned_phi = phi
+    if np.linalg.norm(phi) > 1e-14:
+        phase = np.vdot(projected_phi, phi)
+        if abs(phase) > 1e-14:
+            phase_aligned_phi = phi * np.exp(-1j * np.angle(phase))
+    source_error = np.linalg.norm(phase_aligned_phi - projected_phi) / denom
+    return {
+        "source_pair_amplitudes": phi,
+        "source_pair_norm": float(np.linalg.norm(phi)),
+        "bcs_pair_norm": float(np.linalg.norm(projected_phi)),
+        "relative_source_profile_error": float(source_error),
+    }
+
+
+def default_model(n_levels: int = 4, g: float = 0.7, eta: float = 0.0) -> BCSModel:
     xi = np.linspace(-1.5, 1.5, n_levels)
-    return BCSModel(xi=xi, g=g)
+    return BCSModel(xi=xi, g=g, eta=eta)
