@@ -37,6 +37,17 @@ def main() -> None:
 
     mapped_h = pauli_matrix_sum(bcs_pauli_terms(sourced))
     assert_close("Jordan-Wigner matrix error", float(np.linalg.norm(mapped_h - full["hamiltonian"])), 1e-10)
+
+    complex_source = default_model(n_levels=4, g=0.7, eta=0.01 * np.exp(0.7j))
+    full_complex = exact_ground_state(complex_source)
+    pair_complex = exact_pairspace_ground_state(complex_source)
+    assert_close("complex-source energy agreement", abs(full_complex["energy"] - pair_complex["energy"]), 1e-10)
+    mapped_complex = pauli_matrix_sum(bcs_pauli_terms(complex_source))
+    assert_close(
+        "complex-source Jordan-Wigner matrix error",
+        float(np.linalg.norm(mapped_complex - full_complex["hamiltonian"])),
+        1e-10,
+    )
     print("All consistency checks passed.")
 
 

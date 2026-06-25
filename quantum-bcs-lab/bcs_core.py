@@ -33,7 +33,7 @@ N = CDAG @ C
 class BCSModel:
     xi: np.ndarray
     g: float
-    eta: float = 0.0
+    eta: complex = 0.0
 
     @property
     def n_levels(self) -> int:
@@ -90,10 +90,10 @@ def hamiltonian_matrix(model: BCSModel) -> np.ndarray:
         pj_dag = pair_creation(j, model.n_modes)
         for l in range(model.n_levels):
             h += -model.g * pj_dag @ pair_annihilation(l, model.n_modes)
-    if model.eta:
+    if abs(model.eta):
         for j in range(model.n_levels):
             p = pair_annihilation(j, model.n_modes)
-            h += -model.eta * (p.conj().T + p)
+            h += -model.eta * p.conj().T - np.conj(model.eta) * p
     return 0.5 * (h + h.conj().T)
 
 
@@ -210,11 +210,13 @@ def source_response(model: BCSModel, state: np.ndarray) -> dict:
     return {
         "source_pair_amplitudes": phi,
         "source_pair_norm": float(np.linalg.norm(phi)),
+        "source_pair_phase": float(np.angle(np.sum(phi))) if np.linalg.norm(phi) > 1e-14 else 0.0,
+        "eta_phase": float(np.angle(model.eta)) if abs(model.eta) > 1e-14 else 0.0,
         "bcs_pair_norm": float(np.linalg.norm(projected_phi)),
         "relative_source_profile_error": float(source_error),
     }
 
 
-def default_model(n_levels: int = 4, g: float = 0.7, eta: float = 0.0) -> BCSModel:
+def default_model(n_levels: int = 4, g: float = 0.7, eta: complex = 0.0) -> BCSModel:
     xi = np.linspace(-1.5, 1.5, n_levels)
     return BCSModel(xi=xi, g=g, eta=eta)

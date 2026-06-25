@@ -37,10 +37,14 @@ def pairspace_hamiltonian(model: BCSModel) -> np.ndarray:
                 if target != state:
                     h[target, state] += -model.g
 
-        if model.eta:
+        if abs(model.eta):
             for j in range(model.n_levels):
-                target = state ^ (1 << j)
-                h[target, state] += -model.eta
+                if (state >> j) & 1:
+                    target = state & ~(1 << j)
+                    h[target, state] += -np.conj(model.eta)
+                else:
+                    target = state | (1 << j)
+                    h[target, state] += -model.eta
 
     return 0.5 * (h + h.conj().T)
 
@@ -102,6 +106,8 @@ def pairspace_source_response(model: BCSModel, state: np.ndarray) -> dict:
     return {
         "source_pair_amplitudes": phi,
         "source_pair_norm": float(np.linalg.norm(phi)),
+        "source_pair_phase": float(np.angle(np.sum(phi))) if np.linalg.norm(phi) > 1e-14 else 0.0,
+        "eta_phase": float(np.angle(model.eta)) if abs(model.eta) > 1e-14 else 0.0,
         "bcs_pair_norm": float(np.linalg.norm(projected_phi)),
         "relative_source_profile_error": float(np.linalg.norm(phase_aligned_phi - projected_phi) / denom),
     }

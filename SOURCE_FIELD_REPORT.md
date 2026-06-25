@@ -72,3 +72,31 @@ N = 10: ||<P>|| at eta=0.2 = 1.3038, profile error = 0.1464
 This is the first numerical evidence in the project that increasing the pair
 space improves alignment between the explicitly symmetry-broken exact state and
 the projected BCS anomalous profile.
+
+## Extrapolation and Complex Source
+
+A linear fit in `1/N` was added for each fixed value of `eta`. This is only a
+first finite-size model, but it converts the visual trend into a quantitative
+diagnostic. Representative extrapolated errors are:
+
+```text
+eta = 1.0e-4:  error(N -> infinity) ~= 0.9926
+eta = 8.6e-2:  error(N -> infinity) ~= 0.0953
+eta = 2.0e-1:  error(N -> infinity) ~= 0.0616
+```
+
+The source was also generalized to complex values:
+
+```text
+H_eta = H - sum_j (eta P_j^dagger + eta* P_j).
+```
+
+For `N = 8`, `g = 0.7`, `|eta| = 0.05`, and 16 source phases, the maximum phase
+difference between `arg(sum_j <P_j>)` and `arg(eta)` was:
+
+```text
+2.45e-16
+```
+
+Thus the exact symmetry-broken finite system follows the phase of the external
+pair source to numerical precision.

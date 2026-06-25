@@ -41,6 +41,7 @@ def run_source_sweep(levels_values: list[int], eta_values: np.ndarray, g: float)
                     "exact_energy": exact["energy"],
                     "bcs_gap": closure["delta"],
                     "source_pair_norm": source["source_pair_norm"],
+                    "source_pair_phase": source["source_pair_phase"],
                     "bcs_pair_norm": source["bcs_pair_norm"],
                     "relative_source_profile_error": source["relative_source_profile_error"],
                     "jw_mapping_matrix_error": mapping_error,

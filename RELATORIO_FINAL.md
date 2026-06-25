@@ -152,6 +152,8 @@ Foram implementados os seguintes arquivos:
 - `run_benchmark.py`: benchmark numerico principal com `numpy`.
 - `run_source_sweeps.py`: varreduras do campo fonte `eta`.
 - `run_scaling_sweeps.py`: varredura de escala em `N` e `eta` usando o subespaco de pares.
+- `run_extrapolation.py`: ajuste quantitativo do erro em funcao de `1/N`.
+- `run_phase_sweeps.py`: fonte complexa e resposta de fase do parametro de ordem.
 - `test_consistency.py`: testes de consistencia entre espaco completo, subespaco de pares e mapeamento JW.
 - `qiskit_bcs_exact.py`: camada para Qiskit usando `SparsePauliOp`.
 - `pennylane_bcs_vqe.py`: ansatz variacional BCS em PennyLane.
@@ -290,7 +292,35 @@ N = 10: ||<P>_eta|| = 1.3038368, erro de perfil = 0.1463840
 
 Esse resultado e importante: ele fornece a primeira evidencia numerica de escala de que o estado exato com simetria explicitamente quebrada se alinha melhor ao perfil anomaloso BCS quando o numero de niveis de pares aumenta.
 
-## 12. Interpretacao Computacional do Fechamento Hierarquico
+## 12. Extrapolacao em `1/N` e Fonte Complexa
+
+Para tornar a tendencia de escala mais quantitativa, foi ajustado o erro relativo do perfil fonte contra `1/N` para cada valor fixo de `eta`. O ajuste linear ainda e apenas um primeiro modelo finito, mas ja fornece uma estimativa do erro extrapolado para `N -> infinito`.
+
+Valores representativos:
+
+```text
+eta = 1.0e-4: erro extrapolado ~= 0.9926
+eta = 8.6e-2: erro extrapolado ~= 0.0953
+eta = 2.0e-1: erro extrapolado ~= 0.0616
+```
+
+Isso confirma quantitativamente a tendencia observada nas figuras: para fonte suficientemente forte, a extrapolacao em tamanho aponta para alinhamento muito melhor com o perfil BCS.
+
+Tambem foi implementada uma fonte complexa:
+
+```text
+H_eta = H - sum_j (eta P_j^dagger + eta* P_j).
+```
+
+Para `N = 8`, `g = 0.7`, `|eta| = 0.05` e 16 fases igualmente espacadas, a diferenca maxima entre a fase da resposta anomalosa `arg(sum_j <P_j>)` e a fase da fonte `arg(eta)` foi:
+
+```text
+2.45e-16
+```
+
+Esse resultado e uma checagem forte da fisica de quebra de simetria `U(1)`: a resposta anomalosa exata segue a fase imposta pela fonte externa ate precisao numerica.
+
+## 13. Interpretacao Computacional do Fechamento Hierarquico
 
 O laboratorio permite testar numericamente a ideia central do manuscrito:
 
@@ -310,7 +340,7 @@ Se o residual for pequeno, o fechamento de menor ordem e bom. Se for grande, a h
 
 Isso transforma a proposta teorica em um programa computacional verificavel.
 
-## 13. Papel de Qiskit, PennyLane e Cirq
+## 14. Papel de Qiskit, PennyLane e Cirq
 
 ### Qiskit
 
@@ -345,7 +375,7 @@ Cirq e adequado para:
 
 No projeto, ele pode ser usado para investigar dinamicamente a profundidade hierarquica por espalhamento de operadores.
 
-## 14. Avaliacao Cientifica
+## 15. Avaliacao Cientifica
 
 Como trabalho de fisica teorica, a proposta e promissora porque reorganiza uma teoria conhecida sob uma estrutura mais geral. O valor cientifico esta em mostrar que o BCS mean-field pode ser entendido como uma projecao controlada de uma hierarquia exata.
 
@@ -359,17 +389,17 @@ Como possivel artigo, o estudo ainda precisa reforcar:
 - uma secao mais robusta sobre relacao com Mori-Zwanzig;
 - uma discussao clara sobre limite termodinamico versus sistemas finitos.
 
-## 15. Proximos Passos Recomendados
+## 16. Proximos Passos Recomendados
 
-1. Refinar a extrapolacao quantitativa dos limites `N -> infinito` e `eta -> 0`.
+1. Refinar o modelo de extrapolacao, testando ajustes nao lineares e faixas maiores de `N`.
 2. Rodar varreduras maiores em distribuicoes nao uniformes de `xi`.
 3. Comparar o VQE PennyLane com diagonalizacao exata e fechamento BCS.
 4. Instalar Qiskit, PennyLane e Cirq e executar os tres scripts opcionais.
-5. Adicionar fonte complexa `eta e^{i phi}` para estudar fase global do parametro de ordem.
+5. Estudar fonte complexa em presenca de distribuicoes assimetricas de `xi`.
 6. Criar um notebook unificado para reproducibilidade.
 7. Transformar a auditoria de novidade em uma secao final de discussao do artigo.
 
-## 16. Conclusao
+## 17. Conclusao
 
 O trabalho produziu uma base consistente para um artigo teorico-computacional. A contribuicao principal e a reinterpretacao do formalismo BCS como fechamento de uma hierarquia de equacoes de movimento, com campo medio emergindo como projecao e nao como hipotese inicial.
 
@@ -378,5 +408,7 @@ A parte computacional confirma que o modelo finito pode ser mapeado corretamente
 A extensao com campo fonte `eta` fortalece substancialmente o estudo, porque resolve a principal tensao entre diagonalizacao exata finita e o formalismo BCS de simetria quebrada. Com `eta > 0`, a amplitude anomalosa exata se torna diretamente comparavel ao perfil BCS, transformando a discussao de simetria em um diagnostico numerico concreto.
 
 A nova representacao no subespaco de pares leva essa analise um passo adiante: permite estudar escala ate `N = 10` e mostra que, para fonte finita, o erro de perfil diminui com o aumento do numero de niveis. Isso torna a conexao entre diagonalizacao exata, quebra explicita de simetria e fechamento BCS muito mais convincente.
+
+A extrapolacao em `1/N` e a fonte complexa completam o quadro atual: a primeira transforma a tendencia de escala em estimativa quantitativa; a segunda confirma que a fase do parametro de ordem e controlada pela fase da fonte, como esperado para a quebra de simetria `U(1)`.
 
 Em termos de maturidade cientifica, o projeto esta agora em estagio de **manuscrito teorico-computacional promissor**, com uma tese clara, uma estrutura teorica defensavel, validacao por mapeamento fermion-qubit e um primeiro estudo quantitativo da quebra explicita de simetria.

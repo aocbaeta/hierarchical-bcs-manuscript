@@ -94,13 +94,14 @@ def bcs_pauli_terms(model: BCSModel) -> list[SingleTerm]:
             for coeff, label in jw_product(ops, model.n_modes):
                 acc[label] += -model.g * coeff
 
-    if model.eta:
+    if abs(model.eta):
         for j in range(model.n_levels):
             p_dag = [("create", 2 * j), ("create", 2 * j + 1)]
             p = [("destroy", 2 * j + 1), ("destroy", 2 * j)]
-            for ops in [p_dag, p]:
-                for coeff, label in jw_product(ops, model.n_modes):
-                    acc[label] += -model.eta * coeff
+            for coeff, label in jw_product(p_dag, model.n_modes):
+                acc[label] += -model.eta * coeff
+            for coeff, label in jw_product(p, model.n_modes):
+                acc[label] += -np.conj(model.eta) * coeff
 
     terms = [(coeff, label) for label, coeff in acc.items() if abs(coeff) > 1e-10]
     terms.sort(key=lambda item: item[1])

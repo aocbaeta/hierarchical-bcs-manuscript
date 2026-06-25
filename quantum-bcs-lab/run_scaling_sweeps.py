@@ -45,6 +45,7 @@ def run_scaling(levels_values: list[int], eta_values: np.ndarray, g: float) -> l
                     "eta": float(eta),
                     "exact_pairspace_energy": exact["energy"],
                     "source_pair_norm": source["source_pair_norm"],
+                    "source_pair_phase": source["source_pair_phase"],
                     "bcs_pair_norm": source["bcs_pair_norm"],
                     "relative_source_profile_error": source["relative_source_profile_error"],
                     "leading_pair_density_eigenvalue": density["leading_pair_density_eigenvalue"],

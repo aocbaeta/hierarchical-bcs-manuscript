@@ -28,9 +28,11 @@ def main() -> None:
     parser.add_argument("--levels", type=int, default=4)
     parser.add_argument("--g", type=float, default=0.7)
     parser.add_argument("--eta", type=float, default=0.0)
+    parser.add_argument("--eta-phase", type=float, default=0.0)
     args = parser.parse_args()
 
-    model = default_model(n_levels=args.levels, g=args.g, eta=args.eta)
+    eta = args.eta * np.exp(1j * args.eta_phase)
+    model = default_model(n_levels=args.levels, g=args.g, eta=eta)
     exact = exact_ground_state(model)
     closure = bcs_gap_iteration(default_model(n_levels=args.levels, g=args.g, eta=0.0))
     residual = hierarchy_residual(model, exact["state"])
@@ -46,7 +48,8 @@ def main() -> None:
             "n_qubits": model.n_modes,
             "xi": model.xi.tolist(),
             "g": model.g,
-            "eta": model.eta,
+            "eta_abs": float(abs(model.eta)),
+            "eta_phase": float(np.angle(model.eta)) if abs(model.eta) else 0.0,
         },
         "exact_ground_energy": exact["energy"],
         "bcs_mean_field_energy": closure["energy_mean_field"],
@@ -54,6 +57,7 @@ def main() -> None:
         "leading_pair_density_eigenvalue": residual["leading_pair_density_eigenvalue"],
         "relative_pair_density_residual": residual["relative_pair_density_residual"],
         "source_pair_norm": source["source_pair_norm"],
+        "source_pair_phase": source["source_pair_phase"],
         "relative_source_profile_error": source["relative_source_profile_error"],
         "pauli_terms": len(terms),
         "jw_mapping_matrix_error": mapping_error,
