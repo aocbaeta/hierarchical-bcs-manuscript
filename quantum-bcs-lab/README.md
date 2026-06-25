@@ -101,8 +101,9 @@ Hamiltonian for a small system.
 
 ## Extrapolation and Phase
 
-`run_extrapolation.py` fits the source-profile error against `1/N` at fixed
-`eta`, giving a first estimate of the `N -> infinity` trend.
+`run_extrapolation.py` compares linear `1/N`, quadratic `1/N`, and offset
+power-law finite-size models at fixed `eta`, then selects the best model by
+AICc to estimate the `N -> infinity` trend.
 
 `run_phase_sweeps.py` uses a complex source
 

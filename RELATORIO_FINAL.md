@@ -294,7 +294,15 @@ Esse resultado e importante: ele fornece a primeira evidencia numerica de escala
 
 ## 12. Extrapolacao em `1/N` e Fonte Complexa
 
-Para tornar a tendencia de escala mais quantitativa, foi ajustado o erro relativo do perfil fonte contra `1/N` para cada valor fixo de `eta`. O ajuste linear ainda e apenas um primeiro modelo finito, mas ja fornece uma estimativa do erro extrapolado para `N -> infinito`.
+Para tornar a tendencia de escala mais quantitativa, foi ajustado o erro relativo do perfil fonte contra `1/N` para cada valor fixo de `eta`. Em seguida, a extrapolacao foi refinada comparando tres modelos:
+
+```text
+linear em 1/N
+quadratico em 1/N
+lei de potencia com offset: a + b N^(-alpha)
+```
+
+Usando AICc como criterio de selecao para amostra pequena, o modelo linear em `1/N` foi selecionado para todos os valores de `eta` amostrados. Isso nao prova universalidade da escala linear, mas justifica seu uso como primeiro modelo quantitativo para estes dados.
 
 Valores representativos:
 
@@ -391,7 +399,7 @@ Como possivel artigo, o estudo ainda precisa reforcar:
 
 ## 16. Proximos Passos Recomendados
 
-1. Refinar o modelo de extrapolacao, testando ajustes nao lineares e faixas maiores de `N`.
+1. Ampliar a extrapolacao para faixas maiores de `N` e testar sua estabilidade fora da malha atual.
 2. Rodar varreduras maiores em distribuicoes nao uniformes de `xi`.
 3. Comparar o VQE PennyLane com diagonalizacao exata e fechamento BCS.
 4. Instalar Qiskit, PennyLane e Cirq e executar os tres scripts opcionais.

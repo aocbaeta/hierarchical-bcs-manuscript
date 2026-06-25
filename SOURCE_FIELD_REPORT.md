@@ -75,9 +75,16 @@ the projected BCS anomalous profile.
 
 ## Extrapolation and Complex Source
 
-A linear fit in `1/N` was added for each fixed value of `eta`. This is only a
-first finite-size model, but it converts the visual trend into a quantitative
-diagnostic. Representative extrapolated errors are:
+The finite-size extrapolation was refined by comparing three models at each
+fixed value of `eta`:
+
+- linear in `1/N`;
+- quadratic in `1/N`;
+- offset power law `a + b N^{-alpha}`.
+
+Using AICc as a small-sample model-selection criterion, the linear `1/N` model
+was selected for all sampled values of `eta`. Representative extrapolated
+errors are:
 
 ```text
 eta = 1.0e-4:  error(N -> infinity) ~= 0.9926
