@@ -1,8 +1,27 @@
 # Hierarchical BCS Manuscript
 
-This folder contains a first LaTeX manuscript draft based on the continuation notes in:
+This repository contains a hierarchical equation-of-motion study of the reduced
+BCS Hamiltonian, with finite-size quantum-simulation benchmarks.
 
 `C:\Users\aocbaeta\Downloads\CONTINUACAO_CODEX_HIERARCHICAL_BCS.md`
+
+## PDF Status
+
+The actively maintained final PDF is:
+
+- `relatorio_final_tecnico.pdf`
+
+This file is regenerated whenever the analysis, reports, figures, or numerical
+results are updated.
+
+The files below are retained as archival manuscript snapshots:
+
+- `main.pdf`
+- `main_expanded.pdf`
+
+They are not the current final report. The LaTeX source files were intentionally
+removed from the GitHub repository, so the active deliverable is the compiled
+technical report PDF plus the Markdown reports and reproducible Python scripts.
 
 Files:
 
@@ -10,11 +29,9 @@ Files:
 - `NOVELTY_AUDIT.md`: conservative separation between established literature, demonstrated claims, and open formalization.
 - `RELATORIO_FINAL.md`: Portuguese scientific summary in Markdown.
 - `SOURCE_FIELD_REPORT.md`: source-field extension report.
-- `relatorio_final_tecnico.pdf`: compiled PDF of the final technical report.
-- `main_expanded.pdf`: compiled manuscript copy with expanded appendices.
+- `relatorio_final_tecnico.pdf`: current compiled PDF of the final technical report.
+- `main.pdf`, `main_expanded.pdf`: archival manuscript PDFs.
 - `quantum-bcs-lab/`: finite BCS computational companion using exact diagonalization plus Qiskit, PennyLane, and Cirq layers.
-
-The LaTeX source files were intentionally removed from the GitHub repository; the compiled PDFs are retained.
 
 Computational benchmark:
 
