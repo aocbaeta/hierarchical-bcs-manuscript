@@ -255,7 +255,7 @@ N = 5: ||<P>_eta|| cresce de 0.0006364 para 0.7209736
        erro de perfil cai de 0.9993280 para 0.2457041
 ```
 
-Fisicamente, isso mostra que o sistema finito, quando suavemente perturbado por uma fonte de pares, desenvolve uma resposta anomalosa que se aproxima melhor do perfil BCS a medida que `eta` cresce. O passo seguinte natural seria estudar a ordem dos limites: primeiro aumentar o tamanho do sistema e depois tomar `eta -> 0`.
+Fisicamente, isso mostra que o sistema finito, quando suavemente perturbado por uma fonte de pares, desenvolve uma resposta anomalosa que se aproxima melhor do perfil BCS a medida que `eta` cresce. Essa observacao motivou a etapa seguinte do proprio trabalho: a varredura de escala no subespaco de pares e a extrapolacao preliminar em `1/N`, descritas abaixo.
 
 ## 11. Varredura de Escala no Subespaco de Pares
 
