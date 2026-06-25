@@ -38,6 +38,7 @@ python run_benchmark.py --levels 4 --g 0.7
 python run_benchmark.py --levels 4 --g 0.7 --eta 0.01
 python run_source_sweeps.py --levels 3,4,5 --g 0.7 --eta-min 1e-4 --eta-max 0.2 --points 12 --output-dir source-results
 python run_scaling_sweeps.py --levels 3,4,5,6,7,8,9,10 --g 0.7 --eta-min 1e-4 --eta-max 0.2 --points 10 --output-dir scaling-results
+python run_large_scaling_sweeps.py --levels 6,8,10,12,14,16 --etas 0.02,0.05,0.1,0.2 --g 0.7 --output-dir large-scaling-results
 python run_extrapolation.py --input scaling-results/scaling_sweep_results.csv --output-dir extrapolation-results
 python run_phase_sweeps.py --levels 8 --g 0.7 --eta 0.05 --points 16 --output-dir phase-results
 python test_consistency.py
@@ -98,6 +99,9 @@ dimension from `2**(2*N)` to `2**N`.
 `run_scaling_sweeps.py` uses the pair-subspace Hamiltonian to reach `N=10`.
 It also validates the pair-subspace result against the full fermionic
 Hamiltonian for a small system.
+
+`run_large_scaling_sweeps.py` uses sparse diagonalization in the pair subspace
+to reach `N=16` pair levels, dimension `65536`.
 
 ## Extrapolation and Phase
 

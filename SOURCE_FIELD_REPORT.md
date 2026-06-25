@@ -73,6 +73,29 @@ This is the first numerical evidence in the project that increasing the pair
 space improves alignment between the explicitly symmetry-broken exact state and
 the projected BCS anomalous profile.
 
+## Larger Sparse Scaling
+
+The scaling analysis was extended with sparse diagonalization in the pair
+subspace up to `N = 16`, corresponding to pair-space dimension `65536`. At
+`N = 16`, the sparse Hamiltonian had `5,046,271` nonzero entries.
+
+For `eta = 0.2`, the source-profile error decreased further:
+
+```text
+N = 10: error = 0.1464
+N = 14: error = 0.1267
+N = 16: error = 0.1200
+```
+
+A linear fit in `1/N` over `N = 6,8,10,12,14,16` gave:
+
+```text
+eta = 0.02: error(N -> infinity) ~= 0.1859
+eta = 0.05: error(N -> infinity) ~= 0.1879
+eta = 0.10: error(N -> infinity) ~= 0.1305
+eta = 0.20: error(N -> infinity) ~= 0.0808
+```
+
 ## Extrapolation and Complex Source
 
 The finite-size extrapolation was refined by comparing three models at each

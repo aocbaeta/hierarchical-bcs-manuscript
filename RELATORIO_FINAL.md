@@ -152,6 +152,7 @@ Foram implementados os seguintes arquivos:
 - `run_benchmark.py`: benchmark numerico principal com `numpy`.
 - `run_source_sweeps.py`: varreduras do campo fonte `eta`.
 - `run_scaling_sweeps.py`: varredura de escala em `N` e `eta` usando o subespaco de pares.
+- `run_large_scaling_sweeps.py`: varredura esparsa ampliada ate `N = 16`.
 - `run_extrapolation.py`: ajuste quantitativo do erro em funcao de `1/N`.
 - `run_phase_sweeps.py`: fonte complexa e resposta de fase do parametro de ordem.
 - `test_consistency.py`: testes de consistencia entre espaco completo, subespaco de pares e mapeamento JW.
@@ -292,6 +293,31 @@ N = 10: ||<P>_eta|| = 1.3038368, erro de perfil = 0.1463840
 
 Esse resultado e importante: ele fornece a primeira evidencia numerica de escala de que o estado exato com simetria explicitamente quebrada se alinha melhor ao perfil anomaloso BCS quando o numero de niveis de pares aumenta.
 
+Em seguida, a escala foi ampliada com diagonalizacao esparsa no subespaco de pares ate:
+
+```text
+N = 16
+dimensao = 65536
+numero de elementos nao nulos = 5.046.271
+```
+
+Para `eta = 0.2`, o erro de perfil continuou caindo:
+
+```text
+N = 10: erro = 0.1464
+N = 14: erro = 0.1267
+N = 16: erro = 0.1200
+```
+
+O ajuste linear em `1/N` na faixa ampliada `N = 6, 8, 10, 12, 14, 16` produziu:
+
+```text
+eta = 0.02: erro extrapolado ~= 0.1859
+eta = 0.05: erro extrapolado ~= 0.1879
+eta = 0.10: erro extrapolado ~= 0.1305
+eta = 0.20: erro extrapolado ~= 0.0808
+```
+
 ## 12. Extrapolacao em `1/N` e Fonte Complexa
 
 Para tornar a tendencia de escala mais quantitativa, foi ajustado o erro relativo do perfil fonte contra `1/N` para cada valor fixo de `eta`. Em seguida, a extrapolacao foi refinada comparando tres modelos:
@@ -399,7 +425,7 @@ Como possivel artigo, o estudo ainda precisa reforcar:
 
 ## 16. Proximos Passos Recomendados
 
-1. Ampliar a extrapolacao para faixas maiores de `N` e testar sua estabilidade fora da malha atual.
+1. Testar a estabilidade da extrapolacao para `N > 16`, se a diagonalizacao esparsa permanecer viavel.
 2. Rodar varreduras maiores em distribuicoes nao uniformes de `xi`.
 3. Comparar o VQE PennyLane com diagonalizacao exata e fechamento BCS.
 4. Instalar Qiskit, PennyLane e Cirq e executar os tres scripts opcionais.

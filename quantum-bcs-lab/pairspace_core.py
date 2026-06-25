@@ -10,6 +10,8 @@ instead of 2**(2*N), enabling larger scaling sweeps.
 from __future__ import annotations
 
 import numpy as np
+from scipy.sparse import coo_matrix
+from scipy.sparse.linalg import eigsh
 
 from bcs_core import BCSModel, bcs_gap_iteration
 
@@ -49,6 +51,49 @@ def pairspace_hamiltonian(model: BCSModel) -> np.ndarray:
     return 0.5 * (h + h.conj().T)
 
 
+def pairspace_hamiltonian_sparse(model: BCSModel) -> coo_matrix:
+    dim = 2**model.n_levels
+    rows = []
+    cols = []
+    data = []
+
+    for state in range(dim):
+        occupied = [(state >> j) & 1 for j in range(model.n_levels)]
+        diagonal = sum(2.0 * model.xi[j] * occupied[j] for j in range(model.n_levels))
+        diagonal += sum(-model.g for j in range(model.n_levels) if occupied[j])
+        rows.append(state)
+        cols.append(state)
+        data.append(diagonal)
+
+        for l in range(model.n_levels):
+            if not occupied[l]:
+                continue
+            removed = state & ~(1 << l)
+            for j in range(model.n_levels):
+                if (removed >> j) & 1:
+                    continue
+                target = removed | (1 << j)
+                if target != state:
+                    rows.append(target)
+                    cols.append(state)
+                    data.append(-model.g)
+
+        if abs(model.eta):
+            for j in range(model.n_levels):
+                if (state >> j) & 1:
+                    target = state & ~(1 << j)
+                    value = -np.conj(model.eta)
+                else:
+                    target = state | (1 << j)
+                    value = -model.eta
+                rows.append(target)
+                cols.append(state)
+                data.append(value)
+
+    h = coo_matrix((data, (rows, cols)), shape=(dim, dim), dtype=complex).tocsr()
+    return 0.5 * (h + h.getH())
+
+
 def exact_pairspace_ground_state(model: BCSModel) -> dict:
     h = pairspace_hamiltonian(model)
     evals, evecs = np.linalg.eigh(h)
@@ -57,6 +102,18 @@ def exact_pairspace_ground_state(model: BCSModel) -> dict:
         "eigenvalues": np.real(evals),
         "state": evecs[:, 0],
         "hamiltonian": h,
+    }
+
+
+def exact_pairspace_ground_state_sparse(model: BCSModel) -> dict:
+    h = pairspace_hamiltonian_sparse(model)
+    evals, evecs = eigsh(h, k=1, which="SA", tol=1e-10, maxiter=max(1000, 20 * h.shape[0]))
+    state = evecs[:, 0]
+    return {
+        "energy": float(np.real(evals[0])),
+        "state": state,
+        "hamiltonian_shape": h.shape,
+        "hamiltonian_nnz": int(h.nnz),
     }
 
 
