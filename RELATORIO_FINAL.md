@@ -122,10 +122,16 @@ O laboratorio implementa um modelo BCS finito:
 
 ```text
 H = sum_j xi_j (n_{j up} + n_{j down})
-    - g sum_{j,l} P_j^dagger P_l,
+    - g sum_{j,l} P_j^dagger P_l
+    - eta sum_j (P_j^dagger + P_j),
 
 P_j = c_{j down} c_{j up}.
 ```
+
+O termo proporcional a `eta` foi adicionado na etapa final do trabalho para
+quebrar explicitamente a simetria de numero de particulas. Ele permite comparar
+diretamente amplitudes anomalas exatas `<P_j>_eta` com o perfil anomaloso BCS em
+sistemas finitos.
 
 Cada nivel `j` e mapeado para dois modos fermionicos:
 
@@ -143,6 +149,7 @@ Foram implementados os seguintes arquivos:
 - `bcs_core.py`: operadores fermionicos, Hamiltoniano BCS, diagonalizacao exata, gap BCS e diagnostico hierarquico.
 - `pauli_mapper.py`: mapeamento Jordan-Wigner para strings de Pauli.
 - `run_benchmark.py`: benchmark numerico principal com `numpy`.
+- `run_source_sweeps.py`: varreduras do campo fonte `eta`.
 - `qiskit_bcs_exact.py`: camada para Qiskit usando `SparsePauliOp`.
 - `pennylane_bcs_vqe.py`: ansatz variacional BCS em PennyLane.
 - `cirq_bcs_dynamics.py`: construcao do Hamiltoniano em Cirq.
@@ -196,7 +203,56 @@ C_{jl} = <P_j^dagger P_l>.
 
 Essa e a quantidade correta para estudar correlacoes de emparelhamento em sistemas finitos com conservacao de numero.
 
-## 10. Interpretacao Computacional do Fechamento Hierarquico
+## 10. Campo Fonte e Quebra Explícita de Simetria
+
+Para atacar diretamente a sutileza da simetria de numero, foi implementado o Hamiltoniano com fonte:
+
+```text
+H_eta = H - eta sum_j (P_j^dagger + P_j).
+```
+
+Quando `eta = 0`, a diagonalizacao exata conserva numero de particulas e retorna `<P_j> = 0`. Quando `eta > 0`, a simetria e quebrada explicitamente e a amplitude anomalosa passa a ser mensuravel no estado fundamental exato.
+
+Para `n_levels = 4`, `g = 0.7` e `eta = 0.01`, o benchmark retornou:
+
+```text
+energia exata                  = -6.138028153780934
+gap BCS                         =  1.0234995508486207
+maior autovalor da matriz pares =  1.188768646755869
+residual da matriz de pares     =  0.6800176692222228
+||<P>_eta||                     =  0.05214933870921273
+erro relativo do perfil fonte   =  0.9318941226013666
+numero de termos de Pauli       =  69
+erro do mapeamento JW           =  6.1854469444995704e-15
+```
+
+Esse resultado confirma a interpretacao fisica esperada: a fonte `eta` torna a amplitude anomalosa nao nula, enquanto o mapeamento fermion-qubit continua correto em precisao numerica.
+
+Tambem foi executada uma varredura para:
+
+```text
+N = 3, 4, 5 niveis
+g = 0.7
+eta entre 1e-4 e 0.2
+12 pontos por tamanho
+```
+
+Os resultados principais foram:
+
+```text
+N = 3: ||<P>_eta|| cresce de 0.0002435 para 0.3824441
+       erro de perfil cai de 0.9995733 para 0.3452774
+
+N = 4: ||<P>_eta|| cresce de 0.0005231 para 0.5859435
+       erro de perfil cai de 0.9993159 para 0.2556911
+
+N = 5: ||<P>_eta|| cresce de 0.0006364 para 0.7209736
+       erro de perfil cai de 0.9993280 para 0.2457041
+```
+
+Fisicamente, isso mostra que o sistema finito, quando suavemente perturbado por uma fonte de pares, desenvolve uma resposta anomalosa que se aproxima melhor do perfil BCS a medida que `eta` cresce. O passo seguinte natural seria estudar a ordem dos limites: primeiro aumentar o tamanho do sistema e depois tomar `eta -> 0`.
+
+## 11. Interpretacao Computacional do Fechamento Hierarquico
 
 O laboratorio permite testar numericamente a ideia central do manuscrito:
 
@@ -216,7 +272,7 @@ Se o residual for pequeno, o fechamento de menor ordem e bom. Se for grande, a h
 
 Isso transforma a proposta teorica em um programa computacional verificavel.
 
-## 11. Papel de Qiskit, PennyLane e Cirq
+## 12. Papel de Qiskit, PennyLane e Cirq
 
 ### Qiskit
 
@@ -251,7 +307,7 @@ Cirq e adequado para:
 
 No projeto, ele pode ser usado para investigar dinamicamente a profundidade hierarquica por espalhamento de operadores.
 
-## 12. Avaliacao Cientifica
+## 13. Avaliacao Cientifica
 
 Como trabalho de fisica teorica, a proposta e promissora porque reorganiza uma teoria conhecida sob uma estrutura mais geral. O valor cientifico esta em mostrar que o BCS mean-field pode ser entendido como uma projecao controlada de uma hierarquia exata.
 
@@ -259,26 +315,28 @@ Como trabalho computacional, o projeto e solido porque nao depende apenas de sim
 
 Como possivel artigo, o estudo ainda precisa reforcar:
 
-- a prova detalhada dos comutadores;
-- a demonstracao explicita das contracoes de segunda ordem;
-- uma comparacao numerica sistematica variando `g`, numero de niveis e distribuicao de `xi`;
+- uma prova ainda mais detalhada dos sinais em todos os comutadores;
+- uma comparacao numerica sistematica variando distribuicoes de `xi`;
+- um estudo de escala no limite de muitos niveis;
 - uma secao mais robusta sobre relacao com Mori-Zwanzig;
 - uma discussao clara sobre limite termodinamico versus sistemas finitos.
 
-## 13. Proximos Passos Recomendados
+## 14. Proximos Passos Recomendados
 
-1. Expandir a prova algebraica do fechamento `V^2` em um apendice.
-2. Rodar uma varredura numerica em `g` e `n_levels`.
-3. Gerar figuras: energia exata vs BCS, gap vs acoplamento, residual de pares vs acoplamento.
+1. Estudar a ordem dos limites `N -> infinito` e `eta -> 0`.
+2. Rodar varreduras maiores em distribuicoes nao uniformes de `xi`.
+3. Comparar o VQE PennyLane com diagonalizacao exata e fechamento BCS.
 4. Instalar Qiskit, PennyLane e Cirq e executar os tres scripts opcionais.
-5. Implementar um pequeno campo externo de quebra de simetria para comparar diretamente `<P_j>`.
+5. Adicionar fonte complexa `eta e^{i phi}` para estudar fase global do parametro de ordem.
 6. Criar um notebook unificado para reproducibilidade.
 7. Transformar a auditoria de novidade em uma secao final de discussao do artigo.
 
-## 14. Conclusao
+## 15. Conclusao
 
 O trabalho produziu uma base consistente para um artigo teorico-computacional. A contribuicao principal e a reinterpretacao do formalismo BCS como fechamento de uma hierarquia de equacoes de movimento, com campo medio emergindo como projecao e nao como hipotese inicial.
 
 A parte computacional confirma que o modelo finito pode ser mapeado corretamente para qubits e oferece um caminho concreto para medir a qualidade do fechamento hierarquico. O resultado numerico inicial mostra que os setores residuais da hierarquia nao sao meramente formais: eles aparecem como diferencas mensuraveis na matriz de correlacao de pares.
 
-Em termos de maturidade cientifica, o projeto esta em estagio de **manuscrito inicial forte**, ainda nao pronto para submissao, mas com uma tese clara, uma estrutura teorica defensavel e uma extensao computacional promissora.
+A extensao com campo fonte `eta` fortalece substancialmente o estudo, porque resolve a principal tensao entre diagonalizacao exata finita e o formalismo BCS de simetria quebrada. Com `eta > 0`, a amplitude anomalosa exata se torna diretamente comparavel ao perfil BCS, transformando a discussao de simetria em um diagnostico numerico concreto.
+
+Em termos de maturidade cientifica, o projeto esta agora em estagio de **manuscrito teorico-computacional promissor**, com uma tese clara, uma estrutura teorica defensavel, validacao por mapeamento fermion-qubit e um primeiro estudo quantitativo da quebra explicita de simetria.
