@@ -147,9 +147,12 @@ e depois para qubits por Jordan-Wigner.
 Foram implementados os seguintes arquivos:
 
 - `bcs_core.py`: operadores fermionicos, Hamiltoniano BCS, diagonalizacao exata, gap BCS e diagnostico hierarquico.
+- `pairspace_core.py`: representacao no subespaco de pares, com dimensao `2^N`.
 - `pauli_mapper.py`: mapeamento Jordan-Wigner para strings de Pauli.
 - `run_benchmark.py`: benchmark numerico principal com `numpy`.
 - `run_source_sweeps.py`: varreduras do campo fonte `eta`.
+- `run_scaling_sweeps.py`: varredura de escala em `N` e `eta` usando o subespaco de pares.
+- `test_consistency.py`: testes de consistencia entre espaco completo, subespaco de pares e mapeamento JW.
 - `qiskit_bcs_exact.py`: camada para Qiskit usando `SparsePauliOp`.
 - `pennylane_bcs_vqe.py`: ansatz variacional BCS em PennyLane.
 - `cirq_bcs_dynamics.py`: construcao do Hamiltoniano em Cirq.
@@ -252,7 +255,42 @@ N = 5: ||<P>_eta|| cresce de 0.0006364 para 0.7209736
 
 Fisicamente, isso mostra que o sistema finito, quando suavemente perturbado por uma fonte de pares, desenvolve uma resposta anomalosa que se aproxima melhor do perfil BCS a medida que `eta` cresce. O passo seguinte natural seria estudar a ordem dos limites: primeiro aumentar o tamanho do sistema e depois tomar `eta -> 0`.
 
-## 11. Interpretacao Computacional do Fechamento Hierarquico
+## 11. Varredura de Escala no Subespaco de Pares
+
+Para estudar a ordem dos limites de modo mais eficiente, foi implementada uma representacao no subespaco de pares. Nessa base, cada nivel esta vazio ou ocupado por um par completo. A dimensao cai de:
+
+```text
+2^(2N)  para  2^N.
+```
+
+O termo fonte `eta` tambem preserva esse subespaco, pois cria ou remove pares completos. Assim, foi possivel executar uma varredura ate:
+
+```text
+N = 10 niveis de pares
+dimensao maxima = 1024
+g = 0.7
+eta entre 1e-4 e 0.2
+10 pontos por tamanho
+```
+
+A representacao foi validada contra o Hamiltoniano fermionico completo em `N = 4`:
+
+```text
+diferenca de energia          = 8.881784197001252e-16
+diferenca em ||<P>_eta||      = 1.0798653637955624e-16
+```
+
+Os resultados no maior valor da fonte, `eta = 0.2`, mostram melhora progressiva do alinhamento com o perfil BCS:
+
+```text
+N = 3:  ||<P>_eta|| = 0.3824441, erro de perfil = 0.3452774
+N = 6:  ||<P>_eta|| = 0.8991201, erro de perfil = 0.1874310
+N = 10: ||<P>_eta|| = 1.3038368, erro de perfil = 0.1463840
+```
+
+Esse resultado e importante: ele fornece a primeira evidencia numerica de escala de que o estado exato com simetria explicitamente quebrada se alinha melhor ao perfil anomaloso BCS quando o numero de niveis de pares aumenta.
+
+## 12. Interpretacao Computacional do Fechamento Hierarquico
 
 O laboratorio permite testar numericamente a ideia central do manuscrito:
 
@@ -272,7 +310,7 @@ Se o residual for pequeno, o fechamento de menor ordem e bom. Se for grande, a h
 
 Isso transforma a proposta teorica em um programa computacional verificavel.
 
-## 12. Papel de Qiskit, PennyLane e Cirq
+## 13. Papel de Qiskit, PennyLane e Cirq
 
 ### Qiskit
 
@@ -307,7 +345,7 @@ Cirq e adequado para:
 
 No projeto, ele pode ser usado para investigar dinamicamente a profundidade hierarquica por espalhamento de operadores.
 
-## 13. Avaliacao Cientifica
+## 14. Avaliacao Cientifica
 
 Como trabalho de fisica teorica, a proposta e promissora porque reorganiza uma teoria conhecida sob uma estrutura mais geral. O valor cientifico esta em mostrar que o BCS mean-field pode ser entendido como uma projecao controlada de uma hierarquia exata.
 
@@ -321,9 +359,9 @@ Como possivel artigo, o estudo ainda precisa reforcar:
 - uma secao mais robusta sobre relacao com Mori-Zwanzig;
 - uma discussao clara sobre limite termodinamico versus sistemas finitos.
 
-## 14. Proximos Passos Recomendados
+## 15. Proximos Passos Recomendados
 
-1. Estudar a ordem dos limites `N -> infinito` e `eta -> 0`.
+1. Refinar a extrapolacao quantitativa dos limites `N -> infinito` e `eta -> 0`.
 2. Rodar varreduras maiores em distribuicoes nao uniformes de `xi`.
 3. Comparar o VQE PennyLane com diagonalizacao exata e fechamento BCS.
 4. Instalar Qiskit, PennyLane e Cirq e executar os tres scripts opcionais.
@@ -331,12 +369,14 @@ Como possivel artigo, o estudo ainda precisa reforcar:
 6. Criar um notebook unificado para reproducibilidade.
 7. Transformar a auditoria de novidade em uma secao final de discussao do artigo.
 
-## 15. Conclusao
+## 16. Conclusao
 
 O trabalho produziu uma base consistente para um artigo teorico-computacional. A contribuicao principal e a reinterpretacao do formalismo BCS como fechamento de uma hierarquia de equacoes de movimento, com campo medio emergindo como projecao e nao como hipotese inicial.
 
 A parte computacional confirma que o modelo finito pode ser mapeado corretamente para qubits e oferece um caminho concreto para medir a qualidade do fechamento hierarquico. O resultado numerico inicial mostra que os setores residuais da hierarquia nao sao meramente formais: eles aparecem como diferencas mensuraveis na matriz de correlacao de pares.
 
 A extensao com campo fonte `eta` fortalece substancialmente o estudo, porque resolve a principal tensao entre diagonalizacao exata finita e o formalismo BCS de simetria quebrada. Com `eta > 0`, a amplitude anomalosa exata se torna diretamente comparavel ao perfil BCS, transformando a discussao de simetria em um diagnostico numerico concreto.
+
+A nova representacao no subespaco de pares leva essa analise um passo adiante: permite estudar escala ate `N = 10` e mostra que, para fonte finita, o erro de perfil diminui com o aumento do numero de niveis. Isso torna a conexao entre diagonalizacao exata, quebra explicita de simetria e fechamento BCS muito mais convincente.
 
 Em termos de maturidade cientifica, o projeto esta agora em estagio de **manuscrito teorico-computacional promissor**, com uma tese clara, uma estrutura teorica defensavel, validacao por mapeamento fermion-qubit e um primeiro estudo quantitativo da quebra explicita de simetria.

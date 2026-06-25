@@ -45,3 +45,30 @@ Does the exact finite system, when gently symmetry-broken, align with the BCS an
 This directly addresses the most delicate physics in the project: the relation
 between finite exact diagonalization, explicit symmetry breaking, and the BCS
 mean-field limit.
+
+## Scaling Extension
+
+The source-field analysis was extended with a pair-subspace Hamiltonian. In this
+representation each level is either empty or occupied by one complete pair, so
+the dimension is `2**N` instead of `2**(2*N)`. This allowed sweeps up to
+`N = 10` pair levels.
+
+Validation against the full fermionic Hamiltonian at `N = 4` gave:
+
+```text
+energy_difference:      8.881784197001252e-16
+source_norm_difference: 1.0798653637955624e-16
+```
+
+For `g = 0.7` and `eta` from `1e-4` to `0.2`, the source-induced anomalous norm
+increased with system size and the large-source profile error decreased:
+
+```text
+N = 3:  ||<P>|| at eta=0.2 = 0.3824, profile error = 0.3453
+N = 6:  ||<P>|| at eta=0.2 = 0.8991, profile error = 0.1874
+N = 10: ||<P>|| at eta=0.2 = 1.3038, profile error = 0.1464
+```
+
+This is the first numerical evidence in the project that increasing the pair
+space improves alignment between the explicitly symmetry-broken exact state and
+the projected BCS anomalous profile.
